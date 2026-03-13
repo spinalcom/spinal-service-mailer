@@ -1,0 +1,29 @@
+{
+  "name": "spinal-service-mailer",
+  "version": "1.0.0",
+  "description": "Lightweight mailer service for SpinalCom projects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "tsc --noEmit"
+  },
+  "keywords": [
+    "spinalcom",
+    "mailer",
+    "nodemailer",
+    "email"
+  ],
+  "author": "SpinalCom",
+  "license": "ISC",
+  "dependencies": {
+    "nodemailer": "^7.0.12"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17",
+    "typescript": "^5.7.3"
+  },
+  "spinalDependencies": {}
+}
