@@ -4,7 +4,6 @@
   "description": "Lightweight mailer service for SpinalCom projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
