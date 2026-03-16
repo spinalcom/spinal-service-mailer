@@ -15,6 +15,10 @@
     "nodemailer",
     "email"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spinalcom/spinal-service-mailer.git"
+  },
   "author": "SpinalCom",
   "license": "ISC",
   "dependencies": {
