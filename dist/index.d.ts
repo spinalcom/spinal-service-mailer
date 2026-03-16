@@ -1,3 +1,3 @@
-export { SpinalMailer } from "./SpinalMailer";
-export type { SpinalMailerConfig, SendOptions } from "./SpinalMailer";
+export { SpinalMailer } from "./SpinalMailer.js";
+export type { SpinalMailerConfig, SendOptions } from "./SpinalMailer.js";
 //# sourceMappingURL=index.d.ts.map
