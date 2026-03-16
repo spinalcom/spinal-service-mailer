@@ -4,6 +4,7 @@
   "description": "Lightweight mailer service for SpinalCom projects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "rm -fr dist declarations && tsc",
     "test": "tsc --noEmit"
