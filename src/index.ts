@@ -1,2 +1,2 @@
-export { SpinalMailer } from "./SpinalMailer.js";
-export type { SpinalMailerConfig, SendOptions } from "./SpinalMailer.js";
+export { SpinalMailer } from "./SpinalMailer";
+export type { SpinalMailerConfig, SendOptions } from "./SpinalMailer";

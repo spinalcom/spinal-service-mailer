@@ -1,2 +1,2 @@
-export { SpinalMailer } from "./SpinalMailer.js";
+export { SpinalMailer } from "./SpinalMailer";
 //# sourceMappingURL=index.js.map
