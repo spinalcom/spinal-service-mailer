@@ -24,6 +24,43 @@ export interface SendOptions {
     attachments?: Attachment[];
 }
 
+// RFC 5322-lite: good enough to catch typos without rejecting valid addresses.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeRecipients(
+    input: string | string[] | undefined,
+    field: string
+): string[] {
+    if (input == null) return [];
+
+    const raw = Array.isArray(input) ? input : [input];
+    const seen = new Set<string>();
+    const out: string[] = [];
+
+    for (const entry of raw) {
+        if (typeof entry !== "string") {
+            throw new Error(
+                `SpinalMailer.send(): '${field}' must contain strings.`
+            );
+        }
+        for (const part of entry.split(",")) {
+            const addr = part.trim();
+            if (!addr) continue;
+            if (!EMAIL_RE.test(addr)) {
+                throw new Error(
+                    `SpinalMailer.send(): '${field}' contains an invalid email address: "${addr}".`
+                );
+            }
+            const key = addr.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            out.push(addr);
+        }
+    }
+
+    return out;
+}
+
 export class SpinalMailer {
     private _transporter: Transporter;
     private _defaultFrom: string;
@@ -63,14 +100,32 @@ export class SpinalMailer {
         if (!subject)
             throw new Error("SpinalMailer.send(): 'subject' is required.");
 
+        const toList = normalizeRecipients(to, "to");
+        const ccList = normalizeRecipients(cc, "cc");
+        const bccList = normalizeRecipients(bcc, "bcc");
+
+        if (toList.length === 0)
+            throw new Error(
+                "SpinalMailer.send(): 'to' must contain at least one valid address."
+            );
+
+        const seenAcross = new Set(toList.map((a) => a.toLowerCase()));
+        const dedup = (list: string[]) =>
+            list.filter((a) => {
+                const key = a.toLowerCase();
+                if (seenAcross.has(key)) return false;
+                seenAcross.add(key);
+                return true;
+            });
+
         return this._transporter.sendMail({
             from: from || this._defaultFrom,
-            to,
+            to: toList,
             subject,
             text,
             html,
-            cc,
-            bcc,
+            cc: dedup(ccList),
+            bcc: dedup(bccList),
             attachments,
         });
     }

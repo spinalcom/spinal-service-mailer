@@ -87,4 +87,8 @@ Tests the SMTP connection. Resolves on success, rejects on failure.
 | `bcc` | string \| string[] | no | BCC recipient(s) |
 | `attachments` | array | no | [Nodemailer attachment objects](https://nodemailer.com/message/attachments/) |
 
+`to`, `cc`, and `bcc` accept either an array or a comma-separated string (or an array
+mixing both — e.g. `["a@x.com, b@x.com", "c@x.com"]`). Addresses are validated and
+de-duplicated case-insensitively across the three fields; an invalid address throws.
+
 Returns the nodemailer result object (`messageId`, `envelope`, …).
