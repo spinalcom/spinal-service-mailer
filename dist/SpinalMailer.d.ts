@@ -4,10 +4,18 @@ export interface SpinalMailerConfig {
     host: string;
     port: number;
     secure?: boolean;
-    auth: {
+    /**
+     * SMTP credentials. Omit or set to `false` for relays that authenticate
+     * by IP address (e.g. Google Workspace smtp-relay).
+     */
+    auth?: {
         user: string;
         pass: string;
-    };
+    } | false;
+    /** TLS socket options (e.g. `{ rejectUnauthorized: true }`). */
+    tls?: SMTPTransport.Options["tls"];
+    /** Hostname sent in EHLO/HELO. Defaults to the machine hostname. */
+    name?: string;
     defaultFrom?: string;
 }
 export interface SendOptions {

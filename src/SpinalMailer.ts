@@ -6,10 +6,20 @@ export interface SpinalMailerConfig {
     host: string;
     port: number;
     secure?: boolean;
-    auth: {
-        user: string;
-        pass: string;
-    };
+    /**
+     * SMTP credentials. Omit or set to `false` for relays that authenticate
+     * by IP address (e.g. Google Workspace smtp-relay).
+     */
+    auth?:
+        | {
+              user: string;
+              pass: string;
+          }
+        | false;
+    /** TLS socket options (e.g. `{ rejectUnauthorized: true }`). */
+    tls?: SMTPTransport.Options["tls"];
+    /** Hostname sent in EHLO/HELO. Defaults to the machine hostname. */
+    name?: string;
     defaultFrom?: string;
 }
 
@@ -63,22 +73,26 @@ function normalizeRecipients(
 
 export class SpinalMailer {
     private _transporter: Transporter;
-    private _defaultFrom: string;
+    private _defaultFrom: string | undefined;
 
     constructor(config: SpinalMailerConfig) {
-        if (!config?.host || !config?.port || !config?.auth) {
+        if (!config?.host || !config?.port) {
             throw new Error(
-                "SpinalMailer: host, port and auth are required in config."
+                "SpinalMailer: host and port are required in config."
             );
         }
 
-        this._defaultFrom = config.defaultFrom || config.auth.user;
+        const auth = config.auth || undefined;
+
+        this._defaultFrom = config.defaultFrom || auth?.user;
 
         this._transporter = nodemailer.createTransport({
             host: config.host,
             port: config.port,
             secure: config.secure ?? config.port === 465,
-            auth: config.auth,
+            auth,
+            tls: config.tls,
+            name: config.name,
         });
     }
 
@@ -100,6 +114,12 @@ export class SpinalMailer {
         if (!subject)
             throw new Error("SpinalMailer.send(): 'subject' is required.");
 
+        const sender = from || this._defaultFrom;
+        if (!sender)
+            throw new Error(
+                "SpinalMailer.send(): 'from' is required when no auth user or defaultFrom is configured."
+            );
+
         const toList = normalizeRecipients(to, "to");
         const ccList = normalizeRecipients(cc, "cc");
         const bccList = normalizeRecipients(bcc, "bcc");
@@ -119,7 +139,7 @@ export class SpinalMailer {
             });
 
         return this._transporter.sendMail({
-            from: from || this._defaultFrom,
+            from: sender,
             to: toList,
             subject,
             text,

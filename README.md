@@ -33,6 +33,17 @@ const mailer = new SpinalMailer({
   defaultFrom: "noreply@spinalcom.com", // optional, defaults to auth.user
 });
 
+// Or, with an IP-authenticated relay (e.g. Google Workspace smtp-relay):
+const relayMailer = new SpinalMailer({
+  host: "smtp-relay.gmail.com",
+  port: 587,
+  secure: false,
+  auth: false, // or simply omit
+  tls: { rejectUnauthorized: true },
+  name: "spinalcom.com", // EHLO hostname, optional
+  defaultFrom: "no-reply@spinalcom.com",
+});
+
 // Verify SMTP connection (optional)
 await mailer.verify();
 
@@ -67,8 +78,10 @@ await mailer.send({
 | `config.host` | string | yes | SMTP host |
 | `config.port` | number | yes | SMTP port (465, 587, …) |
 | `config.secure` | boolean | no | `true` for port 465 (auto-detected if omitted) |
-| `config.auth` | object | yes | `{ user, pass }` |
-| `config.defaultFrom` | string | no | Default sender address |
+| `config.auth` | object \| false | no | `{ user, pass }`. Omit or `false` for IP-authenticated relays |
+| `config.tls` | object | no | [TLS options](https://nodemailer.com/smtp/#tls-options) (e.g. `{ rejectUnauthorized: true }`) |
+| `config.name` | string | no | Hostname sent in EHLO/HELO (defaults to machine hostname) |
+| `config.defaultFrom` | string | no | Default sender address (defaults to `auth.user`; without auth, set this or pass `from` to `send()`) |
 
 ### `mailer.verify()`
 

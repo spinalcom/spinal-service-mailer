@@ -29,15 +29,18 @@ function normalizeRecipients(input, field) {
 }
 export class SpinalMailer {
     constructor(config) {
-        if (!config?.host || !config?.port || !config?.auth) {
-            throw new Error("SpinalMailer: host, port and auth are required in config.");
+        if (!config?.host || !config?.port) {
+            throw new Error("SpinalMailer: host and port are required in config.");
         }
-        this._defaultFrom = config.defaultFrom || config.auth.user;
+        const auth = config.auth || undefined;
+        this._defaultFrom = config.defaultFrom || auth?.user;
         this._transporter = nodemailer.createTransport({
             host: config.host,
             port: config.port,
             secure: config.secure ?? config.port === 465,
-            auth: config.auth,
+            auth,
+            tls: config.tls,
+            name: config.name,
         });
     }
     /**
@@ -56,6 +59,9 @@ export class SpinalMailer {
             throw new Error("SpinalMailer.send(): 'to' is required.");
         if (!subject)
             throw new Error("SpinalMailer.send(): 'subject' is required.");
+        const sender = from || this._defaultFrom;
+        if (!sender)
+            throw new Error("SpinalMailer.send(): 'from' is required when no auth user or defaultFrom is configured.");
         const toList = normalizeRecipients(to, "to");
         const ccList = normalizeRecipients(cc, "cc");
         const bccList = normalizeRecipients(bcc, "bcc");
@@ -70,7 +76,7 @@ export class SpinalMailer {
             return true;
         });
         return this._transporter.sendMail({
-            from: from || this._defaultFrom,
+            from: sender,
             to: toList,
             subject,
             text,
